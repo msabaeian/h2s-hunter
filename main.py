@@ -8,10 +8,10 @@ urllib3.disable_warnings()
 
 # the url contains type and cities
 # available_to_book=179 (directly book)
-# city=24%2C25 =  Amsterdam (24) and Rotterdam (25)
-url = "https://holland2stay.com/residences.html?available_to_book=179&city=24%2C25"
-
-test_url = "https://holland2stay.com/residences.html"
+# city=24%2C25 =  Amsterdam (24) and Rotterdam (25) and Haarlem (616)
+url = "https://holland2stay.com/residences.html?available_to_book=179&city=24%2C25%2C616"
+receptor = ""
+api_key = ""
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/111.0",
@@ -28,14 +28,25 @@ HEADERS = {
 
 
 def sendSMS(code):
-    api = KavenegarAPI('API_KEY')
+    api = KavenegarAPI(api_key)
     params = {
         'template': 'code',
         'token': code,
-        'receptor': 'PHONE_NUMBER',
+        'receptor': receptor,
         'token2': '',
         'token3': '',
         'type': 'sms'
+    }
+    api.verify_lookup(params)
+
+
+def makeCall():
+    api = KavenegarAPI(api_key)
+    params = {
+        'template': 'call',
+        'token': "1234",
+        'receptor': receptor,
+        'type': 'call'
     }
     api.verify_lookup(params)
 
@@ -72,6 +83,7 @@ def checkDirectTag():
             if (hasOption):
                 print("[+] Perfect, sending SMS...")
                 sendSMS("AVAILABLE")
+                makeCall()
             else:
                 print("[-] Not suitable!")
 
@@ -83,11 +95,12 @@ def checkDirectTag():
 
 
 counter = 300
-while (counter < 301):
+while (True):
     checkDirectTag()
-    print("---- | ----")
+    print("---- | ---- =>", counter)
     counter = counter + 1
     if (counter >= 300):
         sendSMS("STILL_RUNNING")
         counter = 0
+
     time.sleep(200)
