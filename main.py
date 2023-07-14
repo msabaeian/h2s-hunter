@@ -1,3 +1,4 @@
+from pytgbot import Bot
 from kavenegar import *
 import requests
 from bs4 import BeautifulSoup
@@ -8,10 +9,16 @@ urllib3.disable_warnings()
 
 # the url contains type and cities
 # available_to_book=179 (directly book)
-# city=24%2C25 =  Amsterdam (24) and Rotterdam (25) and Haarlem (616)
-url = "https://holland2stay.com/residences.html?available_to_book=179&city=24%2C25%2C616"
-receptor = ""
+# city=[IDs] =  Amsterdam (24), Rotterdam (25), Haarlem (616), Diemen (110)
+cities = ["24", "25", "616", "110"]
+url = "https://holland2stay.com/residences.html?available_to_book=179&city=" + \
+    "%2C".join(cities)
+
+receptors = ["", ""]
 api_key = ""
+
+BOT_API_KEY = ''
+
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/111.0",
@@ -26,29 +33,36 @@ HEADERS = {
     "Sec-Fetch-User": "?1"
 }
 
+api = KavenegarAPI(api_key)
 
-def sendSMS(code):
+
+def sendMessage(code):
+
+    for receptor in receptors:
+        params = {
+            'template': 'code',
+            'token': code,
+            'receptor': receptor,
+            'token2': '',
+            'token3': '',
+            'type': 'sms'
+        }
+        api.verify_lookup(params)
+
+
+def availableOptionNotify():
     api = KavenegarAPI(api_key)
-    params = {
-        'template': 'code',
-        'token': code,
-        'receptor': receptor,
-        'token2': '',
-        'token3': '',
-        'type': 'sms'
-    }
-    api.verify_lookup(params)
 
+    sendMessage("AVAILABLE_VP")
 
-def makeCall():
-    api = KavenegarAPI(api_key)
-    params = {
-        'template': 'call',
-        'token': "1234",
-        'receptor': receptor,
-        'type': 'call'
-    }
-    api.verify_lookup(params)
+    for receptor in receptors:
+        params = {
+            'template': 'call',
+            'token': "1234",
+            'receptor': receptor,
+            'type': 'call'
+        }
+        api.verify_lookup(params)
 
 
 def checkDirectTag():
@@ -76,14 +90,13 @@ def checkDirectTag():
                 price = int(
                     ''.join(filter(str.isdigit, priceTag[i].text.split(".")[0])))
                 i = i+1
-                if (price < 1600):  # for gross salary purposes
+                if (price < 1600):
                     i = len(priceTag)
                     hasOption = True
 
             if (hasOption):
-                print("[+] Perfect, sending SMS...")
-                sendSMS("AVAILABLE")
-                makeCall()
+                print("[+] Perfect, notify availibility...")
+                availableOptionNotify()
             else:
                 print("[-] Not suitable!")
 
@@ -94,13 +107,13 @@ def checkDirectTag():
         print("[-] Not found")
 
 
-counter = 300
+counter = 180
 while (True):
     checkDirectTag()
     print("---- | ---- =>", counter)
     counter = counter + 1
-    if (counter >= 300):
-        sendSMS("STILL_RUNNING")
+    if (counter >= 180):
+        sendMessage("Alive")
         counter = 0
 
     time.sleep(200)
