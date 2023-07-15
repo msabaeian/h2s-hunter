@@ -1,4 +1,5 @@
-from pytgbot import Bot
+import os
+from dotenv import load_dotenv
 from kavenegar import *
 import requests
 from bs4 import BeautifulSoup
@@ -7,18 +8,17 @@ import urllib3
 import time
 urllib3.disable_warnings()
 
+load_dotenv()
+
 # the url contains type and cities
 # available_to_book=179 (directly book)
-# city=[IDs] =  Amsterdam (24), Rotterdam (25), Haarlem (616), Diemen (110)
-cities = ["24", "25", "616", "110"]
+cities = os.getenv('CITIES').split(",")
 url = "https://holland2stay.com/residences.html?available_to_book=179&city=" + \
     "%2C".join(cities)
 
-receptors = ["", ""]
-api_key = ""
 
-BOT_API_KEY = ''
-
+receptors = os.getenv('RECEPTORS').split(",")
+api = KavenegarAPI(os.getenv('KAVE_NEGAR_API'))
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/111.0",
@@ -32,8 +32,6 @@ HEADERS = {
     "Sec-Fetch-Site": "same-origin",
     "Sec-Fetch-User": "?1"
 }
-
-api = KavenegarAPI(api_key)
 
 
 def sendMessage(code):
@@ -51,8 +49,6 @@ def sendMessage(code):
 
 
 def availableOptionNotify():
-    api = KavenegarAPI(api_key)
-
     sendMessage("AVAILABLE_VP")
 
     for receptor in receptors:
@@ -90,7 +86,7 @@ def checkDirectTag():
                 price = int(
                     ''.join(filter(str.isdigit, priceTag[i].text.split(".")[0])))
                 i = i+1
-                if (price < 1600):
+                if (price < int(os.getenv('BASIC_RENT'))):
                     i = len(priceTag)
                     hasOption = True
 

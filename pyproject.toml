@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "h2s-hunter"
+version = "0.1.0"
+description = ""
+authors = ["Mohammad Sabaeian <msabaeian@gmail.com>"]
+readme = "README.md"
+packages = [{include = "h2s_hunter"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+beautifulsoup4 = "^4.12.2"
+requests = "^2.31.0"
+kavenegar = "^1.1.2"
+pytgbot = "^5.7"
+load-dotenv = "^0.1.0"
+python-dotenv = "^1.0.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
