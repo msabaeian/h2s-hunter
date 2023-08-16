@@ -13,7 +13,11 @@ load_dotenv()
 # the url contains type and cities
 # available_to_book=179 (directly book)
 cities = os.getenv('CITIES').split(",")
-url = "https://holland2stay.com/residences.html?available_to_book=179&city=" + \
+normal_url = "https://holland2stay.com/residences.html"
+student_only_url = "https://holland2stay.com/residences/studentonly.html"
+student_only = True if os.getenv('STUDENT_ONLY') == "YES" else False
+
+url = f"{student_only_url if os.getenv('STUDENT_ONLY') == 'YES' else normal_url}?available_to_book=179&city=" + \
     "%2C".join(cities)
 
 
@@ -107,6 +111,7 @@ counter = 180
 while (True):
     checkDirectTag()
     print("---- | ---- =>", counter)
+    print("URL -> ", url)
     counter = counter + 1
     if (counter >= 180):
         sendMessage("Alive")
